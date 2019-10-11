@@ -1,0 +1,56 @@
+
+调试好的makefile
+######################################
+#静态库
+#需要在MACOS 运行
+######################################
+#编译器类型
+CC =gcc
+CPP =gnu++11
+CFLAGS=-arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
+CXXFLAGS=-arch arm64 -std=c++11  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
+
+LIBPATH =./lib/
+
+$(shell mkdir -p ${LIBPATH})
+
+SLIB = $(LIBPATH)libPDF.a
+
+#编译时头文件链接
+INCLUDES = -I./include
+
+#编译时库链接
+LIBS = -L.
+
+#这里添加编译参数
+TYPEC = c
+TYPECC = cc
+TYPECPP = cpp
+AR =ar
+ARFLAGS = -rc                       #归档选项
+
+#当前目录以及递归子目录文件
+#SRCS = $(wildcard *.$(TYPE))
+SRCS_CFILES = $(shell find . -type f -name '*.$(TYPEC)')
+SRCS_CPPFILES = $(shell find . -type f -name '*.$(TYPECPP)')
+SRCS_CCFILES = $(shell find . -type f -name '*.$(TYPECC)')
+
+OBJFILE = $(SRCS_CFILES:.c=.o) $(SRCS_C++FILES:.cpp=.o) $(SRCS_CCFILES:.cc=.o)
+
+.PHONY:all clean rebuild
+
+all:$(SLIB)
+$(SLIB):$(OBJFILE)
+	$(AR) $(ARFLAGS) $(SLIB) $(OBJFILE)
+	#@-rm -f $(OBJFILE)
+.c.o:
+	$(CC) $(CFLAGS) -c -g $(INCLUDES) $(@D)/$(<F) -o $(@D)/$(@F)
+.cc.o:
+	$(CC) $(CFLAGS) -c -g $(INCLUDES) $(@D)/$(<F) -o $(@D)/$(@F)
+.cpp.o:
+	$(CPP) $(CXXFLAGS) -c -g $(INCLUDES) $(@D)/$(<F) -o $(@D)/$(@F)
+
+clean:
+	-rm -rf $(LIBPATH)
+
+rebuild:clean all
